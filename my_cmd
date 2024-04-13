@@ -1,0 +1,10 @@
+python3 data/prepare_train_data.py /run/timeshift/backup/kitti_raw2/ --dataset-format 'kitti_raw' --dump-root /run/timeshift/backup/kitti_formated/ --width 416 --height 128 --num-threads 4 --static-frames static_frames.txt --with-depth --with-pose
+python3 data/prepare_train_data.py /run/timeshift/backup/kitti_raw/ --dataset-format 'kitti_raw' --dump-root /run/timeshift/backup/kitti_formated2/ --width 416 --height 128 --num-threads 4 --static-frames static_frames.txt --with-depth
+
+python3 train.py /run/timeshift/backup/kitti_formated/ -b4 -m0.2 -s0.1 --epoch-size 3000 --sequence-length 3 --log-output --with-gt
+
+tensorboard --logdir=checkpoints/
+
+python3 run_inference.py --pretrained checkpoints/kitti_formated,epoch_size3000,m0.2/04-09-17:12/exp_pose_model_best.pth.tar --dataset-dir test_img --output-dir test_img_output
+
+python3 test_disp.py --pretrained-dispnet checkpoints/kitti_formated,epoch_size3000,m0.2/04-09-17:12/dispnet_model_best.pth.tar --pretrained-posenet checkpoints/kitti_formated,epoch_size3000,m0.2/04-09-17:12/exp_pose_model_best.pth.tar --dataset-dir /run/timeshift/backup/kitti_raw/ --dataset-list kitti_eval/test_files_eigen.txt
